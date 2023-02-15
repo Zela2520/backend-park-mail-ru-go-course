@@ -1,15 +1,15 @@
-package route
+package check
 
 import (
 	"fmt"
 	"os"
 
-	"github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq"
 	handler "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/handlers"
+	param "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/param"
 )
 
-// будем  передавать срез из основного слайса параметров
-// func checkBoolParams(boolParam ...[]uniq.Param) {
+// будем  передавать срез из основного слайса параметров. Нет тут чекаем опции bool, потом опции int, опции ioput
+// func checkBoolParams(boolParam ...param.Param) {
 // 	for _, val := range boolParam {
 // 		os.Stdout = boolHandler(os.Stdin, os.Stdout, val) // if для первых трех параметров
 // 		os.Stdout = boolHandler(os.Stdin, os.Stdout, val) // второй if глупо делать наверное, поэтому внутри хендлеров надо будет разбить на главные хендлеры и вспомагательные
@@ -18,7 +18,7 @@ import (
 
 // GetHandle | возвращать надо строку, которая собственно будет равна флагу
 // В этой функции как раз-таки можно валидировать параметры.
-func Route(paramList []uniq.Param) {
+func Check(paramList []param.Param) error {
 	for _, val := range paramList {
 		var curVal interface{} = val.OptionValue
 		switch v := curVal.(type) {
@@ -30,9 +30,10 @@ func Route(paramList []uniq.Param) {
 			fmt.Println("string. Need to call StdStream handler", v)
 		}
 	}
+	return nil
 }
 
-func getHandler(params []uniq.Param) {
+func getHandler(params []param.Param) {
 	for _, val := range params {
 		fmt.Println(val)
 	}

@@ -1,4 +1,4 @@
-package uniq
+package param
 
 import (
 	"flag"
@@ -80,6 +80,32 @@ func handleIntParam(destParams *[]Param, srcParams []Param, requiredParamNumber 
 	return &intFlags, nil
 }
 
+// надо провалидировать флаги в соответствии с условиями
+func flagsInit(boolFlags *[]bool, intFlags *[]int, paramsList []Param) ([]Param, error) {
+	i := 0
+	for _, val := range *boolFlags {
+		paramsList[i].OptionValue = val
+		i++
+	}
+	for _, val := range *intFlags {
+		paramsList[i].OptionValue = val
+		i++
+	}
+
+	if len(flag.Args()) > 2 {
+		return paramsList, errors.Wrap(errors.New("More arguments passed than required"), "flagInit function")
+	}
+
+	for _, val := range flag.Args() {
+		if val != "" {
+			curParam := NewStringParam("filepath", "Path to the file", val)
+			paramsList = append(paramsList, *curParam)
+		}
+	}
+
+	return paramsList, nil
+}
+
 func GetParams() ([]Param, error) {
 	var (
 		boolFlags *[]bool
@@ -113,28 +139,10 @@ func GetParams() ([]Param, error) {
 
 	flag.Parse()
 
-	paramsList = flagsInit(boolFlags, intFlags, paramsList)
+	paramsList, err = flagsInit(boolFlags, intFlags, paramsList)
+	if err != nil {
+		return nil, errors.Wrap(err, "Getparam function")
+	}
 
 	return paramsList, nil
-}
-
-// надо провалидировать флаги в соответствии с условиями
-func flagsInit(boolFlags *[]bool, intFlags *[]int, paramsList []Param) []Param {
-	i := 0
-	for _, val := range *boolFlags {
-		paramsList[i].OptionValue = val
-		i++
-	}
-	for _, val := range *intFlags {
-		paramsList[i].OptionValue = val
-		i++
-	}
-	for _, val := range flag.Args() {
-		if val != "" {
-			curParam := NewStringParam("filepath", "Path to the file", val)
-			paramsList = append(paramsList, *curParam)
-		}
-	}
-
-	return paramsList
 }

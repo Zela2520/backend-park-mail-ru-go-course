@@ -1,4 +1,4 @@
-package uniq
+package param
 
 const (
 	numberOfBoolFlags         = 4
