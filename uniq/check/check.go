@@ -1,42 +1,62 @@
 package check
 
 import (
-	"fmt"
-	"os"
-
-	handler "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/handlers"
 	param "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/param"
+	"github.com/pkg/errors"
 )
-
-// будем  передавать срез из основного слайса параметров. Нет тут чекаем опции bool, потом опции int, опции ioput
-// func checkBoolParams(boolParam ...param.Param) {
-// 	for _, val := range boolParam {
-// 		os.Stdout = boolHandler(os.Stdin, os.Stdout, val) // if для первых трех параметров
-// 		os.Stdout = boolHandler(os.Stdin, os.Stdout, val) // второй if глупо делать наверное, поэтому внутри хендлеров надо будет разбить на главные хендлеры и вспомагательные
-// 	}
-// }
 
 // GetHandle | возвращать надо строку, которая собственно будет равна флагу
 // В этой функции как раз-таки можно валидировать параметры.
-func Check(paramList []param.Param) error {
-	for _, val := range paramList {
-		var curVal interface{} = val.OptionValue
-		switch v := curVal.(type) {
-		case bool:
-			fmt.Println("bool. Need to call boolHandler:", v) // будет три главных функции handling-a. С
-		case int:
-			fmt.Println("int. Need to call intHanler:", v)
-		default:
-			fmt.Println("string. Need to call StdStream handler", v)
+func CheckBoolFlags(paramList []param.Param) error {
+	boolParams := paramList[:3]
+	trueFlag := 0
+	for _, val := range boolParams {
+		if val.OptionValue == true {
+			trueFlag++
 		}
 	}
+
+	if trueFlag > 1 {
+		return errors.Wrap(errors.New("CheckBool"), "CheckBool function")
+	}
+
 	return nil
 }
 
-func getHandler(params []param.Param) {
-	for _, val := range params {
-		fmt.Println(val)
-	}
+// func CheckInt(paramList []param.Param) error {
+// 	intParams := paramList[4:6]
+// 	return nil
+// }
 
-	handler.CountUniq(os.Stdin, os.Stdout) // что передавать в handler, продумать структуру handler-a
-}
+// func CheckStream(paramList []param.Param) error {
+// 	if len(paramList) == 7 {
+// 		// вызвать один обработчик ()
+// 	}
+// 	if len(paramList) == 8 {
+// 		// вызвать другой обработчик ()
+// 	}
+// 	return nil
+// }
+
+// func Route() {
+
+// }
+
+// func Check(paramList []param.Param) error {
+// 	err := CheckBool(paramList)
+// 	if err != nil {
+// 		return errors.Wrap(err, "Check function error")
+// 	}
+
+// 	err := CheckInt(paramList)
+// 	if err != nil {
+// 		return errors.Wrap(err, "Check function error")
+// 	}
+
+// 	err := CheckStream(paramList)
+// 	if err != nil {
+// 		return errors.Wrap(err, "Check function error")
+// 	}
+
+// 	return nil
+// }

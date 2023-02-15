@@ -2,6 +2,7 @@ package main
 
 import (
 	"errors"
+	"flag"
 	"fmt"
 	"log"
 	"os"
@@ -12,17 +13,11 @@ import (
 )
 
 func main() {
-
-	// - создадим объект uniq.NewUniq() *Uniq
-	// - data := uniq.ReadData(os.Stdin) // можно сделать так, чтобы в струкуре uniq было поле buffer
-	// - сделать switch case для выбора handler-a
-	// - res := handler.Hanler1(data) // вместо data можно передать uniq.Data
-	// - uniq.WrireData(res, os.Stdout)
-
-	// 1) считать входные данные
-	// 2) обработать входные данные
-	// 3) вернуть данные
-	var err error
+	var (
+		input  string
+		output string
+		err    error
+	)
 
 	options, err := param.GetParams()
 	if err != nil {
@@ -31,10 +26,51 @@ func main() {
 
 	// че должно сюда вернуться ? Было бы пиздато, если бы вернулся указатель на какой-нибудь handler.
 	// А ну в принипе можно возвращать строку, а в самом handler сделать мапу.
-	err = check.Check(options)
+	err = check.CheckBoolFlags(options)
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
+	}
+
+	for i, val := range flag.Args() {
+		switch i {
+		case 0:
+			input = val
+		case 1:
+			output = val
+		}
+	}
+
+	// все это вынести в check пакет, хотя это route по сути
+	for _, val := range options {
+		switch v := val.OptionValue.(type) {
+		case bool:
+			{
+				if val.OptionValue != false {
+					fmt.Println("Need to call handler. Value", v) // вызываем обработчик для заданного флага
+				}
+			}
+
+		case int:
+			{
+				if val.OptionValue != 0 {
+					fmt.Println("Need to call handler. Value", v) // вызываем обработчик для заданного флага
+				}
+			}
+
+		default:
+			{
+				if val.OptionValue != "" { // этому хендлеру передавать в любом случае input и output
+					if input == "" {
+						// input = os.Stdin()
+					}
+					if output == "" {
+
+					}
+					fmt.Println("Need to call handler. Value", v) // вызываем обработчик для заданного флага map[value.Option](arg1, arg2)
+				}
+			}
+		}
 	}
 
 	// после того как прочекали опции идем по массиву
