@@ -8,6 +8,7 @@ import (
 
 	"github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq"
 	handler "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/handlers"
+	"github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/route"
 )
 
 func main() {
@@ -21,7 +22,6 @@ func main() {
 	// 1) считать входные данные
 	// 2) обработать входные данные
 	// 3) вернуть данные
-
 	var err error
 
 	options, err := uniq.GetParams()
@@ -29,10 +29,7 @@ func main() {
 		log.Fatal(errors.Unwrap(err))
 	}
 
-	// отладка флагов
-	for _, val := range options {
-		fmt.Println(val.OptionValue)
-	}
+	route.Route(options) // че должно сюда вернуться ? Было бы пиздато, если бы вернулся указатель на какой-нибудь handler
 
 	err = handler.CountUniq(os.Stdin, os.Stdout)
 	if err != nil {

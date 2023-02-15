@@ -54,3 +54,8 @@ func Uniq(input io.Reader, output io.Writer) error {
 
 	return nil
 }
+
+// сюда будем класть обработчики по ключу, где ключом будет флаг параметра(опции), либо сделать конфиг с ключами
+type Handler struct {
+	handleMap map[string]func(input io.Reader, output io.Writer, value interface{}) string
+}
