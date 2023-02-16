@@ -12,7 +12,6 @@ type Param struct {
 	OptionValue   interface{}
 }
 
-// создание bool параметра (3-ий аргумент по указателю, потому что мы должны хранить именно адрес на флаг)
 func NewBoolParam(initParam string, objMessage string, objValue *bool) *Param {
 	return &Param{
 		Option:        initParam,
@@ -21,7 +20,6 @@ func NewBoolParam(initParam string, objMessage string, objValue *bool) *Param {
 	}
 }
 
-// создание int параметра (3-ий аргумент по указателю, потому что мы должны хранить именно адрес на флаг)
 func NewIntParam(initParam string, objMessage string, objValue *int) *Param {
 	return &Param{
 		Option:        initParam,
@@ -80,7 +78,6 @@ func handleIntParam(destParams *[]Param, srcParams []Param, requiredParamNumber 
 	return &intFlags, nil
 }
 
-// надо провалидировать флаги в соответствии с условиями
 func flagsInit(boolFlags *[]bool, intFlags *[]int, paramsList []Param) ([]Param, error) {
 	i := 0
 	for _, val := range *boolFlags {
