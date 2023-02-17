@@ -2,7 +2,6 @@ package route
 
 import (
 	"flag"
-	"io"
 	"os"
 
 	param "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/param"
@@ -25,17 +24,17 @@ func checkBoolFlags(paramList []param.Param) error {
 	return nil
 }
 
-func checkFileParam() (io.Reader, io.Writer, error) {
+func checkFileParam() (*os.File, *os.File, error) {
 	var (
-		input  io.Reader
-		output io.Writer
+		input  *os.File
+		output *os.File
 		err    error
 	)
 
 	streamHandler := func(filePath string) (*os.File, error) {
-		file, err := os.Open(filePath)
+		file, err := os.OpenFile(filePath, os.O_CREATE|os.O_RDWR|os.O_APPEND, 0666)
 		if err != nil {
-			return nil, errors.Wrap(err, "file does not exist or cannot be opened")
+			return file, errors.Wrap(err, "file does not exist or cannot be opened")
 		}
 		return file, nil
 	}

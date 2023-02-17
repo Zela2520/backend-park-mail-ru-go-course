@@ -6,6 +6,7 @@ import (
 	"io"
 )
 
+// надо чтобы хендлеры принимали еще и buffer какой-то
 func Uniq(input io.Reader, output io.Writer, val interface{}) error {
 	in := bufio.NewScanner(input)
 	var prev string
@@ -67,6 +68,7 @@ func GetNotRepeatedLines(input io.Reader, output io.Writer, val interface{}) err
 
 func GetLinesCompareNWord(input io.Reader, output io.Writer, val interface{}) error {
 	fmt.Println("GetLinesCompareNWord has been called")
+
 	return nil
 }
 
