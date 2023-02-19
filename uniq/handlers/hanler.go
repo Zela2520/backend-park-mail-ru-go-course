@@ -9,7 +9,6 @@ import (
 	"strings"
 )
 
-// надо чтобы хендлеры принимали еще и buffer какой-то
 func Uniq(input io.Reader, output io.Writer) error {
 	in := bufio.NewScanner(input)
 	var prev string
@@ -30,18 +29,19 @@ func Uniq(input io.Reader, output io.Writer) error {
 	return nil
 }
 
-// readBuffer не нужен завести временный буффер с отфильрованными байтами и возвращать его по значению
 func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
 
 	var (
-		in   *bufio.Scanner
-		prev string
+		in      *bufio.Scanner
+		curText string
+		prev    string
 	)
 
 	if len(writeBuffer) != 0 {
+		writeBuffer = append(writeBuffer, "\n") // буффер не пустой - запись должна начаться с новой строки
 		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
-		writeBuffer = writeBuffer[:0]
 		in = bufio.NewScanner(curReader)
+		writeBuffer = writeBuffer[:0] // чистим буффер - будем принимать отфильтровнные данные из Readera
 	} else {
 		in = bufio.NewScanner(input)
 	}
@@ -49,10 +49,10 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 	counts := make(map[string]int)
 
 	for in.Scan() {
-		txt := in.Text()
-		counts[txt]++
+		curText = in.Text()
+		counts[curText]++
 
-		if prev != txt && prev != "" {
+		if prev != curText && counts[prev] != 0 && prev != "" { // counts[prev] != 0 - не выводим сразу новое значение, проверяем есть ли дальше повторы
 			for line, n := range counts {
 				writeBuffer = append(writeBuffer, strconv.Itoa(n), " ", line, "\n")
 			}
@@ -62,11 +62,15 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 			}
 		}
 
-		if txt == prev {
+		if curText == prev {
 			continue
 		}
 
-		prev = txt
+		prev = curText
+	}
+
+	if counts[prev] > 1 {
+		writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev]), " ", curText, "\n")
 	}
 
 	writeBuffer[len(writeBuffer)-1] = ""
@@ -85,19 +89,21 @@ func GetNotRepeatedLines(input io.Reader, val interface{}, writeBuffer []string)
 
 func GetLinesCompareNWord(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
 	// fmt.Println("GetLinesCompareNWord has been called")
-	// var (
-	// 	in   *bufio.Scanner
-	// 	prev string
-	// )
+	var (
+		in *bufio.Scanner
+		// prev string
+	)
 
-	// if len(writeBuffer) != 0 {
-	// 	curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
-	// 	writeBuffer = writeBuffer[:0]
-	// 	in = bufio.NewScanner(curReader)
-	// } else {
-	// 	in = bufio.NewScanner(input)
-	// }
+	if len(writeBuffer) != 0 {
+		writeBuffer = append(writeBuffer, "\n")
+		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
+		writeBuffer = writeBuffer[:0]
+		in = bufio.NewScanner(curReader)
+	} else {
+		in = bufio.NewScanner(input)
+	}
 
+	in.Scan()
 	// for in.Scan() {
 	// 	txt := in.Text()
 	// 	if txt == prev {
@@ -109,8 +115,9 @@ func GetLinesCompareNWord(input io.Reader, val interface{}, writeBuffer []string
 
 	// 	writeBuffer = append(writeBuffer, txt, "\n")
 	// }
+	// in.Scan()
 
-	writeBuffer = append(writeBuffer, "addd some string")
+	writeBuffer = append(writeBuffer, "SDSDSD")
 
 	return writeBuffer, nil
 }
