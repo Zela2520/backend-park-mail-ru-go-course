@@ -9,9 +9,8 @@ import (
 )
 
 func checkBoolFlags(paramList []param.Param) error {
-	boolParams := paramList[:3]
 	trueFlag := 0
-	for _, val := range boolParams {
+	for _, val := range paramList[:3] {
 		if val.OptionValue == true {
 			trueFlag++
 		}

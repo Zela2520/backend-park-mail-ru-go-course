@@ -1,12 +1,20 @@
 package route
 
 import (
+	"fmt"
+	"strings"
+
 	handler "github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/handlers"
 	"github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/param"
 	"github.com/pkg/errors"
 )
 
 func Route(options []param.Param) error {
+
+	var (
+		writeBuffer []string
+	)
+
 	err := checkBoolFlags(options)
 	if err != nil {
 		return errors.Wrap(err, "Route function")
@@ -19,47 +27,38 @@ func Route(options []param.Param) error {
 
 	optionsHandler := handler.NewHandler()
 
-	countOfFiles := 0
+	countOfActiveFlags := 0
 
 	for _, val := range options {
 		switch paramValue := val.OptionValue.(type) {
 		case bool:
 			{
 				if val.OptionValue != false {
-					optionsHandler.HandleMap[val.Option](input, output, paramValue)
-					// fmt.Println(val.OptionMessage, v) // отладка
+					countOfActiveFlags++
+					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, paramValue, writeBuffer)
+					if err != nil {
+						return errors.Wrap(err, "handler error:"+val.OptionMessage)
+					}
 				}
 			}
 
 		case int:
 			{
 				if val.OptionValue != 0 {
-					optionsHandler.HandleMap[val.Option](input, output, paramValue)
-					// fmt.Println(val.OptionMessage, v) // отладка
+					countOfActiveFlags++
+					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, val.OptionValue, writeBuffer)
+					if err != nil {
+						return errors.Wrap(err, "handler error:"+val.OptionMessage)
+					}
 				}
-			}
-
-		default:
-			{
-				countOfFiles++
-				// все что ниже можно убрать
-				// if val.OptionValue != "" {
-				// 	if len(flag.Args()) == 1 {
-				// 		handler.CountUniq(input, output, nil) // defer.close()
-				// 		defer input.Close()
-				// 	}
-				// 	if len(flag.Args()) == countOfFiles && countOfFiles == 2 {
-				// 		fmt.Println("Need to call handler input output. Value", paramValue)
-				// 		handler.CountUniq(input, output, nil) // отладка
-				// 		defer output.Close()
-				// 	}
-				// }
 			}
 		}
 	}
 
-	if countOfFiles == 0 {
-		handler.Uniq(input, output, nil)
+	if countOfActiveFlags == 0 {
+		handler.Uniq(input, output)
+	} else {
+		fmt.Fprintln(output, strings.Join(writeBuffer, ""))
 	}
 
 	return nil
