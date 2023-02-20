@@ -226,3 +226,44 @@ func TestGetLinesWithoutRegister(t *testing.T) {
 
 	require.Equal(t, expectedData, output, "should be equal")
 }
+
+func TestGetLinesCompareNWord(t *testing.T) {
+	var (
+		writeBuffer []string
+		err         error
+	)
+
+	initData := strings.Join([]string{
+		"We love music.",
+		"I love music.",
+		"They love music.",
+		"",
+		"I love music of Kartik.",
+		"We love music of Kartik.",
+		"Thanks.",
+	}, "\n")
+
+	initDataComareWord := 1
+
+	expectedData := strings.Join([]string{
+		"We love music.",
+		"",
+		"I love music of Kartik.",
+		"Thanks.",
+	}, "")
+
+	r := strings.NewReader(initData)
+
+	writeBuffer, err = handler.GetLinesCompareNWord(r, initDataComareWord, writeBuffer)
+	if err != nil {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	output := strings.Join(writeBuffer, "")
+
+	if len(output) == 0 {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	require.Equal(t, expectedData, output, "should be equal")
+}
