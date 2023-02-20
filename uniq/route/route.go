@@ -59,10 +59,13 @@ func Route(options []param.Param) error {
 	}
 
 	if countOfActiveFlags == 0 {
-		handler.Uniq(input, output)
-	} else {
-		fmt.Fprintln(output, strings.Join(writeBuffer, ""))
+		writeBuffer, err = handler.Uniq(input, writeBuffer)
+		if err != nil {
+			return errors.Wrap(err, "handler error: default case error")
+		}
 	}
+
+	fmt.Fprintln(output, strings.Join(writeBuffer, "\n"))
 
 	return nil
 }

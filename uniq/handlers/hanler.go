@@ -7,7 +7,7 @@ import (
 	"strconv"
 )
 
-func Uniq(input io.Reader, output io.Writer) error {
+func Uniq(input io.Reader, output []string) ([]string, error) {
 	in := bufio.NewScanner(input)
 	var prev string
 
@@ -21,10 +21,10 @@ func Uniq(input io.Reader, output io.Writer) error {
 		}
 
 		prev = txt
-		fmt.Fprintln(output, txt)
+		output = append(output, txt)
 	}
 
-	return nil
+	return output, nil
 }
 
 func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
@@ -48,7 +48,7 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 
 		_, exist := counts[prev]
 		if exist == true {
-			writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev]), " ", prev, "\n")
+			writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev)
 
 			delete(counts, prev)
 		}
@@ -56,9 +56,9 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 		prev = curText
 	}
 
-	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev]), " ", prev, "\n") // добавили последний ключ
+	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev) // добавили последний ключ
 
-	writeBuffer[len(writeBuffer)-1] = ""
+	// writeBuffer[len(writeBuffer)-1] = ""
 	return writeBuffer, nil
 }
 
