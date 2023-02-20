@@ -145,3 +145,84 @@ func TestRepeatedLines(t *testing.T) {
 
 	require.Equal(t, expectedData, output, "should be equal")
 }
+
+func TestGetNotRepeatedLines(t *testing.T) {
+	var (
+		writeBuffer []string
+		err         error
+	)
+
+	initData := strings.Join([]string{
+		"I love music.",
+		"I love music.",
+		"I love music.",
+		"",
+		"I love music of Kartik.",
+		"I love music of Kartik.",
+		"Thanks.",
+		"I love music of Kartik.",
+		"I love music of Kartik.",
+	}, "\n")
+
+	expectedData := strings.Join([]string{
+		"",
+		"Thanks.",
+	}, "")
+
+	r := strings.NewReader(initData)
+
+	writeBuffer, err = handler.GetNotRepeatedLines(r, true, writeBuffer)
+	if err != nil {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	output := strings.Join(writeBuffer, "")
+
+	if len(output) == 0 {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	require.Equal(t, expectedData, output, "should be equal")
+}
+
+func TestGetLinesWithoutRegister(t *testing.T) {
+	var (
+		writeBuffer []string
+		err         error
+	)
+
+	initData := strings.Join([]string{
+		"I LOVE MUSIC.",
+		"I love music.",
+		"I LoVe MuSiC.",
+
+		"I love MuSIC of Kartik.",
+		"I love music of kartik.",
+		"Thanks.",
+		"I love music of kartik.",
+		"I love MuSIC of Kartik.",
+	}, "\n")
+
+	expectedData := strings.Join([]string{
+		"I LOVE MUSIC.",
+		"",
+		"I love MuSIC of Kartik.",
+		"Thanks.",
+		"I love music of kartik.",
+	}, "")
+
+	r := strings.NewReader(initData)
+
+	writeBuffer, err = handler.GetLinesWithoutRegister(r, true, writeBuffer)
+	if err != nil {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	output := strings.Join(writeBuffer, "")
+
+	if len(output) == 0 {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	require.Equal(t, expectedData, output, "should be equal")
+}

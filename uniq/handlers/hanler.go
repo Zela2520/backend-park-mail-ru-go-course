@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"strconv"
+	"strings"
 )
 
 func Uniq(input io.Reader, output []string) ([]string, error) {
@@ -151,7 +152,22 @@ func GetLinesCompareNChar(input io.Reader, val interface{}, writeBuffer []string
 }
 
 func GetLinesWithoutRegister(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	fmt.Println("GetLinesWithoutRegister has been called")
+	in := bufio.NewScanner(input)
+	var prev string
+
+	for in.Scan() {
+		txt := in.Text()
+		if strings.ToLower(txt) == strings.ToLower(prev) {
+			continue
+		}
+		if txt == io.EOF.Error() {
+			break
+		}
+
+		prev = txt
+		writeBuffer = append(writeBuffer, txt)
+	}
+
 	return writeBuffer, nil
 }
 
