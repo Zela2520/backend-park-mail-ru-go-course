@@ -2,7 +2,6 @@ package handler
 
 import (
 	"bufio"
-	"fmt"
 	"io"
 	"strconv"
 	"strings"
@@ -180,7 +179,38 @@ func GetLinesCompareNWord(input io.Reader, val interface{}, writeBuffer []string
 }
 
 func GetLinesCompareNChar(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	fmt.Println("GetLinesCompareNChar has been called")
+	in := bufio.NewScanner(input)
+	var (
+		prev            string
+		curCompareLine  string
+		prevCompareLine string
+		err             error
+	)
+
+	for in.Scan() {
+		txt := in.Text()
+
+		curCompareLine = skipSymbols(txt, val.(int))
+		if err != nil {
+			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
+		}
+		prevCompareLine = skipSymbols(prev, val.(int))
+		if err != nil {
+			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
+		}
+
+		if curCompareLine == prevCompareLine {
+			continue
+		}
+
+		if txt == io.EOF.Error() {
+			break
+		}
+
+		prev = txt
+		writeBuffer = append(writeBuffer, txt)
+	}
+
 	return writeBuffer, nil
 }
 

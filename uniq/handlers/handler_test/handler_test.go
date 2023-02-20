@@ -267,3 +267,45 @@ func TestGetLinesCompareNWord(t *testing.T) {
 
 	require.Equal(t, expectedData, output, "should be equal")
 }
+
+func TestGetLinesCompareNChar(t *testing.T) {
+	var (
+		writeBuffer []string
+		err         error
+	)
+
+	initData := strings.Join([]string{
+		"I love music.",
+		"A love music.",
+		"C love music.",
+		"",
+		"I love music of Kartik.",
+		"We love music of Kartik.",
+		"Thanks.",
+	}, "\n")
+
+	initDataComareWord := 1
+
+	expectedData := strings.Join([]string{
+		"I love music.",
+		"",
+		"I love music of Kartik.",
+		"We love music of Kartik.",
+		"Thanks.",
+	}, "")
+
+	r := strings.NewReader(initData)
+
+	writeBuffer, err = handler.GetLinesCompareNChar(r, initDataComareWord, writeBuffer)
+	if err != nil {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	output := strings.Join(writeBuffer, "")
+
+	if len(output) == 0 {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	require.Equal(t, expectedData, output, "should be equal")
+}

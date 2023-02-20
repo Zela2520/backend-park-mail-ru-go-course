@@ -22,7 +22,6 @@ func selectReader(writeBuffer []string, input io.Reader) *bufio.Scanner {
 func skipWords(curLine string, numberOfSkipWords int) (string, error) {
 	for i := 0; i < numberOfSkipWords; i++ {
 		separatorIndex := strings.Index(curLine, " ")
-		// fmt.Println("CurLine: ", curLine)
 		if separatorIndex == -1 {
 			return curLine, nil
 		}
@@ -35,4 +34,12 @@ func skipWords(curLine string, numberOfSkipWords int) (string, error) {
 	}
 
 	return curLine, nil
+}
+
+func skipSymbols(curLine string, numberOfSkipSymbols int) string {
+	if numberOfSkipSymbols <= len(curLine) {
+		return curLine[numberOfSkipSymbols:]
+	}
+
+	return curLine
 }
