@@ -36,7 +36,7 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 
 	in = selectReader(writeBuffer, input)
 	counts := make(map[string]int)
-	writeBuffer = writeBuffer[:0] // можно потом флаг какой-нить прикрутить на выполнение этого действия
+	writeBuffer = writeBuffer[:0]
 
 	for in.Scan() {
 		curText = in.Text()
@@ -57,12 +57,45 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 	}
 
 	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev) // добавили последний ключ
-
-	// writeBuffer[len(writeBuffer)-1] = ""
 	return writeBuffer, nil
 }
 
 func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
+	var (
+		in      *bufio.Scanner
+		curText string
+		prev    string
+	)
+
+	in = selectReader(writeBuffer, input)
+	counts := make(map[string]int)
+	writeBuffer = writeBuffer[:0]
+
+	for in.Scan() {
+		curText = in.Text()
+		counts[curText]++
+
+		if prev == curText {
+			continue
+		}
+
+		_, exist := counts[prev]
+		if exist == true && counts[prev] > 1 {
+			writeBuffer = append(writeBuffer, prev)
+
+			delete(counts, prev)
+		}
+
+		if exist == true {
+			delete(counts, prev)
+		}
+
+		prev = curText
+	}
+
+	if counts[prev] > 1 {
+		writeBuffer = append(writeBuffer, prev)
+	}
 
 	return writeBuffer, nil
 }

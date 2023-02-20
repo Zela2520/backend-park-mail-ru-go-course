@@ -10,7 +10,7 @@ import (
 func selectReader(writeBuffer []string, input io.Reader) *bufio.Scanner {
 	if len(writeBuffer) != 0 {
 		// writeBuffer = append(writeBuffer, "\n") // буффер не пустой - запись должна начаться с новой строки
-		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
+		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, "\n")).Bytes()) // тут скорее всего "\n"
 		return bufio.NewScanner(curReader)
 	} else {
 		return bufio.NewScanner(input)
