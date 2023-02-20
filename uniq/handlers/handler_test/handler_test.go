@@ -8,6 +8,48 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+func TestUniq(t *testing.T) {
+	var (
+		writeBuffer []string
+		err         error
+	)
+
+	initData := strings.Join([]string{
+		"I love music.",
+		"I love music.",
+		"I love music.",
+		"",
+		"I love music of Kartik.",
+		"I love music of Kartik.",
+		"Thanks.",
+		"I love music of Kartik.",
+		"I love music of Kartik.",
+	}, "\n")
+
+	expectedData := strings.Join([]string{
+		"I love music.",
+		"",
+		"I love music of Kartik.",
+		"Thanks.",
+		"I love music of Kartik.",
+	}, "")
+
+	r := strings.NewReader(initData)
+
+	writeBuffer, err = handler.Uniq(r, writeBuffer)
+	if err != nil {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	output := strings.Join(writeBuffer, "")
+
+	if len(output) == 0 {
+		t.Errorf("Uniq method error: %s", "")
+	}
+
+	require.Equal(t, expectedData, output, "should be equal")
+}
+
 func TestCountUniq(t *testing.T) {
 	var (
 		writeBuffer []string
@@ -50,7 +92,7 @@ func TestCountUniq(t *testing.T) {
 	require.Equal(t, expectedData, output, "should be equal")
 }
 
-func TestUniq(t *testing.T) {
+func TestRepeatedLines(t *testing.T) {
 	var (
 		writeBuffer []string
 		err         error
@@ -66,19 +108,31 @@ func TestUniq(t *testing.T) {
 		"Thanks.",
 		"I love music of Kartik.",
 		"I love music of Kartik.",
+		"sddsds",
+		"sdsdsd",
+		"",
+		"",
+		"111",
+		"111",
+		"",
+		"",
+		"1",
+		"1",
 	}, "\n")
 
 	expectedData := strings.Join([]string{
 		"I love music.",
+		"I love music of Kartik.",
+		"I love music of Kartik.",
 		"",
-		"I love music of Kartik.",
-		"Thanks.",
-		"I love music of Kartik.",
+		"111",
+		"",
+		"1",
 	}, "")
 
 	r := strings.NewReader(initData)
 
-	writeBuffer, err = handler.Uniq(r, writeBuffer)
+	writeBuffer, err = handler.GetRepeatedLines(r, true, writeBuffer)
 	if err != nil {
 		t.Errorf("Uniq method error: %s", "")
 	}
