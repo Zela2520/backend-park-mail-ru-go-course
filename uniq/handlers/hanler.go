@@ -101,7 +101,42 @@ func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([
 }
 
 func GetNotRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	fmt.Println("GetNotRepeatedLines has been called")
+	var (
+		in      *bufio.Scanner
+		curText string
+		prev    string
+	)
+
+	in = selectReader(writeBuffer, input)
+	counts := make(map[string]int)
+	writeBuffer = writeBuffer[:0]
+
+	for in.Scan() {
+		curText = in.Text()
+		counts[curText]++
+
+		if prev == curText {
+			continue
+		}
+
+		_, exist := counts[prev]
+		if exist == true && counts[prev] == 1 {
+			writeBuffer = append(writeBuffer, prev)
+
+			delete(counts, prev)
+		}
+
+		if exist == true {
+			delete(counts, prev)
+		}
+
+		prev = curText
+	}
+
+	if counts[prev] == 1 {
+		writeBuffer = append(writeBuffer, prev)
+	}
+
 	return writeBuffer, nil
 }
 
@@ -126,7 +161,7 @@ type Handler struct {
 
 func NewHandler() *Handler {
 	newMap := make(map[string]func(input io.Reader, val interface{}, writeBuffer []string) ([]string, error))
-	newMap["c"] = CountUniq // CountUniq GetLinesCompareNWord
+	newMap["c"] = CountUniq
 	newMap["d"] = GetRepeatedLines
 	newMap["u"] = GetNotRepeatedLines
 	newMap["f"] = GetLinesCompareNWord
