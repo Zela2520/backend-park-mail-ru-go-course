@@ -9,6 +9,16 @@ import (
 	"strings"
 )
 
+func selectReader(writeBuffer []string, input io.Reader) *bufio.Scanner {
+	if len(writeBuffer) != 0 {
+		writeBuffer = append(writeBuffer, "\n") // буффер не пустой - запись должна начаться с новой строки
+		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
+		return bufio.NewScanner(curReader)
+	} else {
+		return bufio.NewScanner(input)
+	}
+}
+
 func Uniq(input io.Reader, output io.Writer) error {
 	in := bufio.NewScanner(input)
 	var prev string
@@ -37,14 +47,9 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 		prev    string
 	)
 
-	if len(writeBuffer) != 0 {
-		writeBuffer = append(writeBuffer, "\n") // буффер не пустой - запись должна начаться с новой строки
-		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
-		in = bufio.NewScanner(curReader)
-		writeBuffer = writeBuffer[:0] // чистим буффер - будем принимать отфильтровнные данные из Readera
-	} else {
-		in = bufio.NewScanner(input)
-	}
+	in = selectReader(writeBuffer, input)
+
+	writeBuffer = writeBuffer[:0] // чистим буффер - будем принимать отфильтровнные данные из Readera
 
 	counts := make(map[string]int)
 
@@ -79,6 +84,7 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 }
 
 func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
+
 	return writeBuffer, nil
 }
 
@@ -88,36 +94,37 @@ func GetNotRepeatedLines(input io.Reader, val interface{}, writeBuffer []string)
 }
 
 func GetLinesCompareNWord(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	// fmt.Println("GetLinesCompareNWord has been called")
 	var (
-		in *bufio.Scanner
-		// prev string
+		in      *bufio.Scanner
+		curText string
+		prev    string
 	)
 
-	if len(writeBuffer) != 0 {
-		writeBuffer = append(writeBuffer, "\n")
-		curReader := bytes.NewReader(bytes.NewBufferString(strings.Join(writeBuffer, ",")).Bytes())
-		writeBuffer = writeBuffer[:0]
-		in = bufio.NewScanner(curReader)
-	} else {
-		in = bufio.NewScanner(input)
+	in = selectReader(writeBuffer, input)
+
+	counts := make(map[string]int)
+
+	writeBuffer = writeBuffer[:0]
+
+	for in.Scan() {
+		curText = in.Text()
+		counts[curText]++
+
+		if prev == curText {
+			continue
+		}
+
+		_, exist := counts[prev]
+		if exist == true {
+			writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev]), " ", prev, "\n")
+
+			delete(counts, prev)
+		}
+
+		prev = curText
 	}
 
-	in.Scan()
-	// for in.Scan() {
-	// 	txt := in.Text()
-	// 	if txt == prev {
-	// 		continue
-	// 	}
-	// 	if txt == io.EOF.Error() {
-	// 		break
-	// 	}
-
-	// 	writeBuffer = append(writeBuffer, txt, "\n")
-	// }
-	// in.Scan()
-
-	writeBuffer = append(writeBuffer, "SDSDSD")
+	writeBuffer[len(writeBuffer)-1] = ""
 
 	return writeBuffer, nil
 }
@@ -138,7 +145,7 @@ type Handler struct {
 
 func NewHandler() *Handler {
 	newMap := make(map[string]func(input io.Reader, val interface{}, writeBuffer []string) ([]string, error))
-	newMap["c"] = CountUniq
+	newMap["c"] = GetLinesCompareNWord // CountUniq
 	newMap["d"] = GetRepeatedLines
 	newMap["u"] = GetNotRepeatedLines
 	newMap["f"] = GetLinesCompareNWord

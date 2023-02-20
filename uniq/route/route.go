@@ -25,6 +25,9 @@ func Route(options []param.Param) error {
 		return errors.Wrap(err, "checkFileParm function error")
 	}
 
+	defer input.Close()
+	defer output.Close()
+
 	optionsHandler := handler.NewHandler()
 
 	countOfActiveFlags := 0
