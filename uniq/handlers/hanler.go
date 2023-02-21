@@ -40,6 +40,7 @@ func Uniq(input io.Reader, output []string, numberOfSkipWords int, numberOfSkipC
 	return output, nil
 }
 
+// TODO: сделать компаратор - передавать его в функию, поскольку обработчики отличаются тока правилом сравнения.
 func CountUniq(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	var (
 		in              *bufio.Scanner
@@ -77,7 +78,7 @@ func CountUniq(input io.Reader, writeBuffer []string, numberOfSkipWords int, num
 		prev = curText
 	}
 
-	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev) // prevComareLine
+	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev)
 	return writeBuffer, nil
 }
 
@@ -171,7 +172,7 @@ func GetNotRepeatedLines(input io.Reader, writeBuffer []string, numberOfSkipWord
 	}
 
 	if counts[prev] == 1 {
-		writeBuffer = append(writeBuffer, prev) // prev || prevCompareLine
+		writeBuffer = append(writeBuffer, prev)
 	}
 
 	return writeBuffer, nil

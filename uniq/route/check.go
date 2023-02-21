@@ -23,7 +23,7 @@ func checkBoolFlags(paramList []param.Param) error {
 	return nil
 }
 
-func checkFileParam() (*os.File, *os.File, error) {
+func getStreams() (*os.File, *os.File, error) {
 	var (
 		input  *os.File
 		output *os.File

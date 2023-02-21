@@ -11,16 +11,14 @@ import (
 
 func Route(options []param.Param) error {
 
-	var (
-		writeBuffer []string
-	)
+	var writeBuffer []string
 
 	err := checkBoolFlags(options)
 	if err != nil {
 		return errors.Wrap(err, "Route function")
 	}
 
-	input, output, err := checkFileParam()
+	input, output, err := getStreams()
 	if err != nil {
 		return errors.Wrap(err, "checkFileParm function error")
 	}
@@ -29,22 +27,15 @@ func Route(options []param.Param) error {
 	defer output.Close()
 
 	modifyingOptions := options[3:6] // -i -f -s
-
-	optionsHandler := handler.NewHandler(modifyingOptions...) // options[3].OptionValue(bool), options[4].OptionValue.(int), options[5].OptionValue.(int)
-
+	optionsHandler := handler.NewHandler(modifyingOptions...)
 	countOfActiveFlags := 0
 
 	for _, val := range options[:3] {
-		switch val.OptionValue.(type) { // paramValue :=
-		case bool:
-			{
-				if val.OptionValue != false {
-					countOfActiveFlags++
-					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, writeBuffer, options[4].OptionValue.(int), options[5].OptionValue.(int), options[3].OptionValue.(bool)) // TODO: убарть передачу функций, сделать все через конструктор
-					if err != nil {
-						return errors.Wrap(err, "handler error:"+val.OptionMessage)
-					}
-				}
+		if val.OptionValue != false {
+			countOfActiveFlags++
+			writeBuffer, err = optionsHandler.HandleMap[val.Option](input, writeBuffer, options[4].OptionValue.(int), options[5].OptionValue.(int), options[3].OptionValue.(bool)) // TODO: убарть передачу функций, сделать все через конструктор
+			if err != nil {
+				return errors.Wrap(err, "handler error:"+val.OptionMessage)
 			}
 		}
 	}
