@@ -28,28 +28,20 @@ func Route(options []param.Param) error {
 	defer input.Close()
 	defer output.Close()
 
-	optionsHandler := handler.NewHandler()
+	modifyingOptions := options[3:6] // -i -f -s
+
+	optionsHandler := handler.NewHandler(modifyingOptions...) // options[3].OptionValue(bool), options[4].OptionValue.(int), options[5].OptionValue.(int)
 
 	countOfActiveFlags := 0
 
-	for _, val := range options {
-		switch paramValue := val.OptionValue.(type) {
+	// TODO: если не одной [-c | -d | -u] нет, то вызываем дефолтный хендлер в который передаем [-i, -f, -s]
+	for _, val := range options[:3] {
+		switch val.OptionValue.(type) { // paramValue :=
 		case bool:
 			{
 				if val.OptionValue != false {
 					countOfActiveFlags++
-					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, paramValue, writeBuffer)
-					if err != nil {
-						return errors.Wrap(err, "handler error:"+val.OptionMessage)
-					}
-				}
-			}
-
-		case int:
-			{
-				if val.OptionValue != 0 {
-					countOfActiveFlags++
-					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, val.OptionValue, writeBuffer)
+					writeBuffer, err = optionsHandler.HandleMap[val.Option](input, writeBuffer, options[4].OptionValue.(int), options[5].OptionValue.(int), options[3].OptionValue.(bool)) // TODO: убарть передачу функций, сделать все через конструктор
 					if err != nil {
 						return errors.Wrap(err, "handler error:"+val.OptionMessage)
 					}
@@ -59,7 +51,7 @@ func Route(options []param.Param) error {
 	}
 
 	if countOfActiveFlags == 0 {
-		writeBuffer, err = handler.Uniq(input, writeBuffer)
+		writeBuffer, err = handler.Uniq(input, writeBuffer, modifyingOptions[1].OptionValue.(int), modifyingOptions[2].OptionValue.(int), modifyingOptions[0].OptionValue.(bool))
 		if err != nil {
 			return errors.Wrap(err, "handler error: default case error")
 		}

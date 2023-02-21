@@ -4,21 +4,32 @@ import (
 	"bufio"
 	"io"
 	"strconv"
-	"strings"
 
+	"github.com/Zela2520/backend-park-mail-ru-go-course.git/uniq/param"
 	"github.com/pkg/errors"
 )
 
-func Uniq(input io.Reader, output []string) ([]string, error) {
+func Uniq(input io.Reader, output []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	in := bufio.NewScanner(input)
-	var prev string
+	var (
+		prev            string
+		curCompareLine  string
+		prevCompareLine string
+		err             error
+	)
 
 	for in.Scan() {
 		txt := in.Text()
-		if txt == prev {
+
+		curCompareLine, prevCompareLine, err = processModifyingOptions(txt, prev, numberOfSkipWords, numberOfSkipChar, register)
+		if err != nil {
+			return nil, errors.Wrap(err, "processModifyingOptions error:")
+		}
+
+		if curCompareLine == prevCompareLine {
 			continue
 		}
-		if txt == io.EOF.Error() {
+		if curCompareLine == io.EOF.Error() {
 			break
 		}
 
@@ -29,22 +40,30 @@ func Uniq(input io.Reader, output []string) ([]string, error) {
 	return output, nil
 }
 
-func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
+func CountUniq(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	var (
-		in      *bufio.Scanner
-		curText string
-		prev    string
+		in              *bufio.Scanner
+		curText         string
+		prev            string
+		curCompareLine  string
+		prevCompareLine string
+		err             error
 	)
 
 	in = selectReader(writeBuffer, input)
-	counts := make(map[string]int)
 	writeBuffer = writeBuffer[:0]
+	counts := make(map[string]int)
 
 	for in.Scan() {
 		curText = in.Text()
 		counts[curText]++
 
-		if prev == curText {
+		curCompareLine, prevCompareLine, err = processModifyingOptions(curText, prev, numberOfSkipWords, numberOfSkipChar, register)
+		if err != nil {
+			return nil, errors.Wrap(err, "processModifyingOptions error:")
+		}
+
+		if prevCompareLine == curCompareLine {
 			continue
 		}
 
@@ -58,15 +77,18 @@ func CountUniq(input io.Reader, val interface{}, writeBuffer []string) ([]string
 		prev = curText
 	}
 
-	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev) // добавили последний ключ
+	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev) // prevComareLine
 	return writeBuffer, nil
 }
 
-func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
+func GetRepeatedLines(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	var (
-		in      *bufio.Scanner
-		curText string
-		prev    string
+		in              *bufio.Scanner
+		curText         string
+		prev            string
+		curCompareLine  string
+		prevCompareLine string
+		err             error
 	)
 
 	in = selectReader(writeBuffer, input)
@@ -77,7 +99,12 @@ func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([
 		curText = in.Text()
 		counts[curText]++
 
-		if prev == curText {
+		curCompareLine, prevCompareLine, err = processModifyingOptions(curText, prev, numberOfSkipWords, numberOfSkipChar, register)
+		if err != nil {
+			return nil, errors.Wrap(err, "processModifyingOptions error:")
+		}
+
+		if prevCompareLine == curCompareLine {
 			continue
 		}
 
@@ -102,22 +129,30 @@ func GetRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([
 	return writeBuffer, nil
 }
 
-func GetNotRepeatedLines(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
+func GetNotRepeatedLines(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	var (
-		in      *bufio.Scanner
-		curText string
-		prev    string
+		in              *bufio.Scanner
+		curText         string
+		prev            string
+		curCompareLine  string
+		prevCompareLine string
+		err             error
 	)
 
 	in = selectReader(writeBuffer, input)
-	counts := make(map[string]int)
 	writeBuffer = writeBuffer[:0]
+	counts := make(map[string]int)
 
 	for in.Scan() {
 		curText = in.Text()
 		counts[curText]++
 
-		if prev == curText {
+		curCompareLine, prevCompareLine, err = processModifyingOptions(curText, prev, numberOfSkipWords, numberOfSkipChar, register)
+		if err != nil {
+			return nil, errors.Wrap(err, "processModifyingOptions error:")
+		}
+
+		if prevCompareLine == curCompareLine {
 			continue
 		}
 
@@ -136,117 +171,29 @@ func GetNotRepeatedLines(input io.Reader, val interface{}, writeBuffer []string)
 	}
 
 	if counts[prev] == 1 {
-		writeBuffer = append(writeBuffer, prev)
-	}
-
-	return writeBuffer, nil
-}
-
-func GetLinesCompareNWord(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	in := bufio.NewScanner(input)
-	var (
-		prev            string
-		curCompareLine  string
-		prevCompareLine string
-		err             error
-	)
-
-	for in.Scan() {
-		txt := in.Text()
-
-		curCompareLine, err = skipWords(txt, val.(int))
-		if err != nil {
-			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
-		}
-		prevCompareLine, err = skipWords(prev, val.(int))
-		if err != nil {
-			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
-		}
-
-		if curCompareLine == prevCompareLine {
-			continue
-		}
-
-		if txt == io.EOF.Error() {
-			break
-		}
-
-		prev = txt
-		writeBuffer = append(writeBuffer, txt)
-	}
-
-	return writeBuffer, nil
-}
-
-func GetLinesCompareNChar(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	in := bufio.NewScanner(input)
-	var (
-		prev            string
-		curCompareLine  string
-		prevCompareLine string
-		err             error
-	)
-
-	for in.Scan() {
-		txt := in.Text()
-
-		curCompareLine = skipSymbols(txt, val.(int))
-		if err != nil {
-			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
-		}
-		prevCompareLine = skipSymbols(prev, val.(int))
-		if err != nil {
-			return writeBuffer, errors.Wrap(err, "GetLinesCompareNWord error")
-		}
-
-		if curCompareLine == prevCompareLine {
-			continue
-		}
-
-		if txt == io.EOF.Error() {
-			break
-		}
-
-		prev = txt
-		writeBuffer = append(writeBuffer, txt)
-	}
-
-	return writeBuffer, nil
-}
-
-func GetLinesWithoutRegister(input io.Reader, val interface{}, writeBuffer []string) ([]string, error) {
-	in := bufio.NewScanner(input)
-	var prev string
-
-	for in.Scan() {
-		txt := in.Text()
-		if strings.ToLower(txt) == strings.ToLower(prev) {
-			continue
-		}
-		if txt == io.EOF.Error() {
-			break
-		}
-
-		prev = txt
-		writeBuffer = append(writeBuffer, txt)
+		writeBuffer = append(writeBuffer, prev) // prev || prevCompareLine
 	}
 
 	return writeBuffer, nil
 }
 
 type Handler struct {
-	HandleMap map[string]func(input io.Reader, val interface{}, writeBuffer []string) ([]string, error)
+	HandleMap           map[string]func(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error)
+	activeRegister      bool
+	numberOfSkipWords   int
+	numberOfSkipSymbols int
 }
 
-func NewHandler() *Handler {
-	newMap := make(map[string]func(input io.Reader, val interface{}, writeBuffer []string) ([]string, error))
+func NewHandler(args ...param.Param) *Handler { // _numberOfSkipWords int, _numberOfSkipSymbols int
+	newMap := make(map[string]func(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error))
+	// как привязать методы объекта мапы к ключам функции ?
 	newMap["c"] = CountUniq
 	newMap["d"] = GetRepeatedLines
 	newMap["u"] = GetNotRepeatedLines
-	newMap["f"] = GetLinesCompareNWord
-	newMap["s"] = GetLinesCompareNChar
-	newMap["i"] = GetLinesWithoutRegister
 	return &Handler{
-		HandleMap: newMap,
+		HandleMap:           newMap,
+		activeRegister:      args[0].OptionValue.(bool),
+		numberOfSkipWords:   args[1].OptionValue.(int),
+		numberOfSkipSymbols: args[2].OptionValue.(int),
 	}
 }

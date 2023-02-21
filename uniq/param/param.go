@@ -80,10 +80,12 @@ func handleIntParam(destParams *[]Param, srcParams []Param, requiredParamNumber 
 
 func flagsInit(boolFlags *[]bool, intFlags *[]int, paramsList []Param) ([]Param, error) {
 	i := 0
+
 	for _, val := range *boolFlags {
 		paramsList[i].OptionValue = val
 		i++
 	}
+
 	for _, val := range *intFlags {
 		paramsList[i].OptionValue = val
 		i++
