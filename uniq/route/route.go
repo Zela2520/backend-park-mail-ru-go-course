@@ -34,7 +34,6 @@ func Route(options []param.Param) error {
 
 	countOfActiveFlags := 0
 
-	// TODO: если не одной [-c | -d | -u] нет, то вызываем дефолтный хендлер в который передаем [-i, -f, -s]
 	for _, val := range options[:3] {
 		switch val.OptionValue.(type) { // paramValue :=
 		case bool:
