@@ -153,32 +153,33 @@ func GetNotRepeatedLines(input io.Reader, writeBuffer []string, numberOfSkipWord
 
 	for in.Scan() {
 		curText = in.Text()
-		counts[curText]++
 
 		curCompareLine, prevCompareLine, err = processModifyingOptions(curText, prev, numberOfSkipWords, numberOfSkipChar, register)
 		if err != nil {
 			return nil, errors.Wrap(err, "processModifyingOptions error:")
 		}
 
+		counts[curCompareLine]++
+
 		if prevCompareLine == curCompareLine {
 			continue
 		}
 
-		_, exist := counts[prev]
-		if exist == true && counts[prev] == 1 {
+		_, exist := counts[prevCompareLine]
+		if exist == true && counts[prevCompareLine] == 1 {
 			writeBuffer = append(writeBuffer, prev)
 
-			delete(counts, prev)
+			delete(counts, prevCompareLine)
 		}
 
 		if exist == true {
-			delete(counts, prev)
+			delete(counts, prevCompareLine)
 		}
 
 		prev = curText
 	}
 
-	if counts[prev] == 1 {
+	if counts[prev] == 1 || counts[curCompareLine] == 1 {
 		writeBuffer = append(writeBuffer, prev)
 	}
 
