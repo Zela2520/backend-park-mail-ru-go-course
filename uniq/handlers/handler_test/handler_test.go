@@ -218,17 +218,17 @@ func TestCountUniq(t *testing.T) {
 					"I love music of Kartik.",
 				}, "\n"),
 				ExpectedData: strings.Join([]string{
-					"I love music.",
-					"",
-					"I love music of Kartik.",
-					"Thanks.",
-					"I love music of Kartik.",
+					"3 I love music.",
+					"1 ",
+					"2 I love music of Kartik.",
+					"1 Thanks.",
+					"2 I love music of Kartik.",
 				}, ""),
 			},
-			expErr: "Uniq test failed",
+			expErr: "Without option test failed",
 		},
 		{
-			name: "Negative case",
+			name: "With register option",
 			in: &Case{
 				Register:      true,
 				ModifyOptions: make([]int, 2),
@@ -243,61 +243,27 @@ func TestCountUniq(t *testing.T) {
 					"I love music of kartik.",
 					"I love MuSIC of Kartik.",
 				}, "\n"),
-				ExpectedData: strings.Join([]string{
-					"I LOVE MUSIC.",
-					"",
-					"I love MuSIC of Kartik.",
-					"Thanks.",
-					"I love music of kartik.",
-				}, ""),
+				ExpectedData: "3 I LOVE MUSIC.1 2 I love MuSIC of Kartik.1 Thanks.2 I love music of kartik.",
 			},
-			expErr: "GetLinesWithoutRegister test failed",
+			expErr: "With register option test failed",
 		},
 		{
-			name: "With register option",
+			name: "With integer options",
 			in: &Case{
-				Register:      false,
-				ModifyOptions: intOptions[0],
+				Register:      true,
+				ModifyOptions: intOptions[2],
 				InitData: strings.Join([]string{
-					"We love music.",
 					"I love music.",
-					"They love music.",
+					"A LoVe music.",
+					"C lOvE music.",
 					"",
-					"I love music of Kartik.",
-					"We love music of Kartik.",
+					"I Home music of Kartik.",
+					"We Lome music of Kartik.",
 					"Thanks.",
 				}, "\n"),
-				ExpectedData: strings.Join([]string{
-					"We love music.",
-					"",
-					"I love music of Kartik.",
-					"Thanks.",
-				}, ""),
+				ExpectedData: "3 I love music.1 2 I Home music of Kartik.1 Thanks.",
 			},
-			expErr: "GetLinesCompareNWord test failed",
-		},
-		{
-			name: "With integet options",
-			in: &Case{
-				Register:      false,
-				ModifyOptions: intOptions[0],
-				InitData: strings.Join([]string{
-					"We love music.",
-					"I love music.",
-					"They love music.",
-					"",
-					"I love music of Kartik.",
-					"We love music of Kartik.",
-					"Thanks.",
-				}, "\n"),
-				ExpectedData: strings.Join([]string{
-					"We love music.",
-					"",
-					"I love music of Kartik.",
-					"Thanks.",
-				}, ""),
-			},
-			expErr: "GetLinesCompareNWord test failed",
+			expErr: "Unic count with integer options test failed",
 		},
 	}
 
@@ -306,7 +272,7 @@ func TestCountUniq(t *testing.T) {
 			r := strings.NewReader(tCase.in.InitData)
 			writeBuffer, err = handler.CountUniq(r, writeBuffer, tCase.in.ModifyOptions[0], tCase.in.ModifyOptions[1], tCase.in.Register)
 			if err != nil {
-				t.Errorf("Uniq method error: %s", "")
+				t.Errorf("CountUniq method error: %s", tCase.expErr)
 			}
 
 			output := strings.Join(writeBuffer, "")

@@ -40,7 +40,7 @@ func Uniq(input io.Reader, output []string, numberOfSkipWords int, numberOfSkipC
 	return output, nil
 }
 
-// TODO: сделать компаратор - передавать его в функию, поскольку обработчики отличаются тока правилом сравнения.
+// TODO: сделать компаратор - передавать его в функию, поскольку 3 обработчика отличаются тока правилом сравнения.
 func CountUniq(input io.Reader, writeBuffer []string, numberOfSkipWords int, numberOfSkipChar int, register bool) ([]string, error) {
 	var (
 		in              *bufio.Scanner
@@ -57,28 +57,34 @@ func CountUniq(input io.Reader, writeBuffer []string, numberOfSkipWords int, num
 
 	for in.Scan() {
 		curText = in.Text()
-		counts[curText]++
 
 		curCompareLine, prevCompareLine, err = processModifyingOptions(curText, prev, numberOfSkipWords, numberOfSkipChar, register)
 		if err != nil {
 			return nil, errors.Wrap(err, "processModifyingOptions error:")
 		}
 
+		counts[curCompareLine]++
+
 		if prevCompareLine == curCompareLine {
 			continue
 		}
 
-		_, exist := counts[prev]
+		_, exist := counts[prevCompareLine]
 		if exist == true {
-			writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev)
+			writeBuffer = append(writeBuffer, strconv.Itoa(counts[prevCompareLine])+" "+prev)
 
-			delete(counts, prev)
+			delete(counts, prevCompareLine)
 		}
 
 		prev = curText
 	}
 
-	writeBuffer = append(writeBuffer, strconv.Itoa(counts[prev])+" "+prev)
+	if counts[curCompareLine] == 1 && counts[prevCompareLine] == 0 {
+		writeBuffer = append(writeBuffer, strconv.Itoa(counts[curCompareLine])+" "+prev)
+	} else {
+		writeBuffer = append(writeBuffer, strconv.Itoa(counts[prevCompareLine])+" "+prev)
+	}
+
 	return writeBuffer, nil
 }
 
