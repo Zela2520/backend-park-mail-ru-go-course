@@ -47,8 +47,6 @@ func Route(options []param.Param) error {
 		}
 	}
 
-	fmt.Println(writeBuffer)
-
 	fmt.Fprintln(output, strings.Join(writeBuffer, "\n"))
 
 	return nil
